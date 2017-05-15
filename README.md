@@ -3,8 +3,8 @@ Simple GitHub repositories search application conducted by user search query. Wh
 
 <img src="https://github.com/MatijaKruljac/github-search-app/blob/master/screen_shot.png?raw=true" width="300" height="500">
 
-## Architecture
-There is 
+### Architecture
+In this project there is 
 - Coordinator (Mediator)
 - MVVM 
 - Null Object Pattern
