@@ -52,83 +52,17 @@ class DataFetcher {
     }
     
     private func addExistingValues(for item: JSON) -> ResultElement {
-        
-        var repositrotyNameValue: ResultAttributeDataType
-        if let repositrotyName = item[JSONKeys.name.attribut].string {
-            repositrotyNameValue = ResultAttributeDataType.string(repositrotyName)
-        } else {
-            repositrotyNameValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.name.attribut))
-        }
-        
-        var ownerLoginValue: ResultAttributeDataType
-        if let ownerLogin = item[JSONKeys.owner.attribut][JSONKeys.login.attribut].string {
-            ownerLoginValue = ResultAttributeDataType.string(ownerLogin)
-        } else {
-            ownerLoginValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.login.attribut))
-        }
-        
-        var ownerAvatarUrlValue: ResultAttributeDataType
-        if let ownerAvatarUrl = item[JSONKeys.owner.attribut][JSONKeys.avatarUrl.attribut].string {
-            ownerAvatarUrlValue = ResultAttributeDataType.string(ownerAvatarUrl)
-        } else {
-            ownerAvatarUrlValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.avatarUrl.attribut))
-        }
-        
-        var languageValue: ResultAttributeDataType
-        if let language = item[JSONKeys.language.attribut].string {
-            languageValue = ResultAttributeDataType.string(language)
-        } else {
-            languageValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.language.attribut))
-        }
-        
-        var dateOfCreationValue: ResultAttributeDataType
-        if let dateOfCreation = item[JSONKeys.dateOfCreation.attribut].string {
-            dateOfCreationValue = ResultAttributeDataType.string(dateOfCreation)
-        } else {
-            dateOfCreationValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.dateOfCreation.attribut))
-        }
-        
-        var dateOfUpdateValue: ResultAttributeDataType
-        if let dateOfUpdate = item[JSONKeys.dateOfUpdate.attribut].string {
-            dateOfUpdateValue = ResultAttributeDataType.string(dateOfUpdate)
-        } else {
-            dateOfUpdateValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.dateOfUpdate.attribut))
-        }
-        
-        var watchersCountValue: ResultAttributeDataType
-        if let watchersCount = item[JSONKeys.watchersCount.attribut].int {
-            watchersCountValue = ResultAttributeDataType.integer(watchersCount)
-        } else {
-            watchersCountValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.watchersCount.attribut))
-        }
-        
-        var forksCountValue: ResultAttributeDataType
-        if let forksCount = item[JSONKeys.forksCount.attribut].int {
-            forksCountValue = ResultAttributeDataType.integer(forksCount)
-        } else {
-            forksCountValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.forksCount.attribut))
-        }
-        
-        var openIssuesCountValue: ResultAttributeDataType
-        if let openIssuesCount = item[JSONKeys.openIssuesCount.attribut].int {
-            openIssuesCountValue = ResultAttributeDataType.integer(openIssuesCount)
-        } else {
-            openIssuesCountValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.openIssuesCount.attribut))
-        }
-        
-        var descriptionValue: ResultAttributeDataType
-        if let description = item[JSONKeys.description.attribut].string {
-            descriptionValue = ResultAttributeDataType.string(description)
-        } else {
-            descriptionValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.description.attribut))
-        }
-        
-        let errorMessageValue: ResultAttributeDataType
-        if let errorMessage = item[JSONKeys.message.attribut].string {
-            errorMessageValue = ResultAttributeDataType.string(errorMessage)
-        } else {
-            errorMessageValue = ResultAttributeDataType.null(NullAttributeValue.init(with: JSONKeys.message.attribut))
-        }
+        let repositrotyNameValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.name.attribut], with: JSONKeys.name.attribut)
+        let ownerLoginValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.owner.attribut][JSONKeys.login.attribut], with: JSONKeys.login.attribut)
+        let ownerAvatarUrlValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.owner.attribut][JSONKeys.avatarUrl.attribut], with: JSONKeys.avatarUrl.attribut)
+        let languageValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.language.attribut], with: JSONKeys.language.attribut)
+        let dateOfCreationValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.dateOfCreation.attribut], with: JSONKeys.dateOfCreation.attribut)
+        let dateOfUpdateValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.dateOfUpdate.attribut], with: JSONKeys.dateOfUpdate.attribut)
+        let watchersCountValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.watchersCount.attribut], with: JSONKeys.watchersCount.attribut)
+        let forksCountValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.forksCount.attribut], with: JSONKeys.forksCount.attribut)
+        let openIssuesCountValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.openIssuesCount.attribut], with: JSONKeys.openIssuesCount.attribut)
+        let descriptionValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.description.attribut], with: JSONKeys.description.attribut)
+        let errorMessageValue = ResultAttributeDataType.setupValue(in: item[JSONKeys.message.attribut], with: JSONKeys.message.attribut)
         
         let resultElement = ResultElement.init(repositoryName: repositrotyNameValue, authorName: ownerLoginValue,
                                                authorThumbnailUrl: ownerAvatarUrlValue, language: languageValue,
@@ -137,6 +71,19 @@ class DataFetcher {
                                                numberOfIssues: openIssuesCountValue, description: descriptionValue,
                                                errorMessage: errorMessageValue)
         return resultElement
+    }
+}
+
+extension ResultAttributeDataType {
+    
+    static func setupValue(in item: JSON, with key: String) -> ResultAttributeDataType {
+        if let stringValue = item.string {
+            return .string(stringValue)
+        }
+        if let integerValue = item.int {
+            return .integer(integerValue)
+        }
+        return .null(NullAttributeValue.init(with: key))
     }
 }
 

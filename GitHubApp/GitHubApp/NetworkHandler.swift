@@ -29,14 +29,16 @@ class NetworkHandler {
                 .request(GitHubUrls.apiRepositories, parameters: parameters)
                 .responseJSON(queue: responseQueue, completionHandler: { response in
                     DispatchQueue.main.async {
-                        if let value = response.value {
-                            let json = JSON(value)
-                            observer.onNext(json)
+                        DispatchQueue.main.async {
+                            if let value = response.value {
+                                let json = JSON(value)
+                                observer.on(.next(json))
+                            }
+                            if let error = response.error {
+                                observer.on(.error(ResponseError.networkFailure(content: error)))
+                            }
+                            observer.on(.completed)
                         }
-                        if let error = response.error {
-                            observer.onError(ResponseError.networkFailure(content: error))
-                        }
-                        observer.onCompleted()
                     }
                 })
             return Disposables.create()
