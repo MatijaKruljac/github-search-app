@@ -9,6 +9,15 @@
 import Foundation
 import UIKit
 
+extension UIWindow {
+    
+    func addRoot(viewController: UIViewController, with navigationController: UINavigationController) {
+        navigationController.viewControllers = [viewController]
+        rootViewController = navigationController
+        makeKeyAndVisible()
+    }
+}
+
 class NavigationService {
     
     var navigationController = UINavigationController()
@@ -26,13 +35,11 @@ class NavigationService {
             bundle: nil,
             withViewControllerDependencies: viewControllerDependencies)
         
-        if let window = window {
-            navigationController.viewControllers = [searchScreenViewController]
-            window.rootViewController = navigationController
-            window.makeKeyAndVisible()
+        guard let window = window else {
+            navigationController.pushViewController(searchScreenViewController, animated: true)
             return
         }
-        navigationController.pushViewController(searchScreenViewController, animated: true)
+        window.addRoot(viewController: searchScreenViewController, with: navigationController)
     }
     
     func pushDetailsScreenViewController(withResultElement resultElement: ResultElement) {
