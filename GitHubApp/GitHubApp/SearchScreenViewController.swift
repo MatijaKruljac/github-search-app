@@ -116,16 +116,16 @@ class SearchScreenViewController: BaseViewController {
     
     private func handleSwitchValueChange() {
         guard let searchBarText = searchBar.text, searchBarText.isEmptyAfterTrimmingWhitespaces else {
-            showAlert()
+            showAlert(withMessage: "You did not enter query!")
             return
         }
         sendRequestForData(with: searchBarText)
     }
     
-    private func showAlert() {
+    fileprivate func showAlert(withMessage message: String) {
         let alert = UIAlertController(
             title: "Warning",
-            message: "You did not enter query!",
+            message: message,
             preferredStyle: UIAlertControllerStyle.alert)
         alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler: nil))
         present(alert, animated: true, completion: nil)
@@ -190,6 +190,11 @@ extension SearchScreenViewController: UISearchBarDelegate {
             .subscribe(onNext: { [weak self] value in
                 self?.data.value = value
                 self?.shouldHideFetchingDataIndicator(true)
+                }, onError: { [weak self] error in
+                    if case ResponseError.networkFailure(_) = error {
+                        self?.shouldHideFetchingDataIndicator(true)
+                        self?.showAlert(withMessage: "Network connection problem!")
+                    }
             }).disposed(by: disposeBag)
         searchBar.endEditing(true)
     }

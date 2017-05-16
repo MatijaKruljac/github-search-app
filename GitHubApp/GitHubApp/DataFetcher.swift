@@ -27,8 +27,9 @@ class DataFetcher {
                 .subscribe(onNext: { value in
                     guard let parsedData = self?.parse(json: value) else { return }
                     observer.on(.next(parsedData))
-                    observer.onCompleted()
-                    
+                    observer.on(.completed)
+                }, onError: { error in
+                    observer.on(.error(error))
                 }).disposed(by: disposeBag)
             return Disposables.create()
         }

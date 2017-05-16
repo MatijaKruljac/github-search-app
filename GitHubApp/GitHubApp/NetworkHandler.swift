@@ -32,9 +32,9 @@ class NetworkHandler {
                         if let value = response.value {
                             let json = JSON(value)
                             observer.onNext(json)
-                        } else {
-                            let error = JSON([JSONKeys.message.attribut : ResponseError.value.rawValue])
-                            observer.onNext(error)
+                        }
+                        if let error = response.error {
+                            observer.onError(ResponseError.networkFailure(content: error))
                         }
                         observer.onCompleted()
                     }
@@ -80,6 +80,6 @@ enum Sort {
     }
 }
 
-enum ResponseError: String {
-    case value = "Error occured!"
+enum ResponseError: Error {
+    case networkFailure(content: Error)
 }

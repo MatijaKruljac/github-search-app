@@ -29,8 +29,9 @@ class SearchScreenViewModel: BaseViewModel {
                 .asObservable()
                 .subscribe(onNext: { elements in
                     observer.on(.next(elements))
-                    observer.onCompleted()
-                    
+                    observer.on(.completed)
+                }, onError: { error in
+                    observer.on(.error(error))
                 }).disposed(by: disposeBag)
             return Disposables.create()
         }
