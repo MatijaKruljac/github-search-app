@@ -13,7 +13,7 @@ import SwiftyJSON
 
 class NetworkHandler {
     
-    func fetchDataFor(query: String, with sort: Sort? = nil) -> Observable<JSON> {
+    func fetchDataFor(query: String, with sort: Sort? = nil) -> Observable<Response> {
         return Observable.create { observer in
             
             let responseQueue = DispatchQueue(
@@ -28,21 +28,29 @@ class NetworkHandler {
             Alamofire
                 .request(GitHubUrls.apiRepositories, parameters: parameters)
                 .responseJSON(queue: responseQueue, completionHandler: { response in
-                    DispatchQueue.main.async {
-                        DispatchQueue.main.async {
-                            if let value = response.value {
-                                let json = JSON(value)
-                                observer.on(.next(json))
-                            }
-                            if let error = response.error {
-                                observer.on(.error(ResponseError.networkFailure(content: error)))
-                            }
-                            observer.on(.completed)
+                    DispatchQueue.main.async { [weak self] _ in
+                        guard let sSelf = self else { return }
+                        if let value = response.value {
+                            let json = JSON(value)
+                            let responseType = sSelf.getResponseType(for: json)
+                            observer.on(.next(responseType))
                         }
+                        
+                        if let error = response.error {
+                            observer.on(.error(ResponseError.networkFailure(content: error)))
+                        }
+                        observer.on(.completed)
                     }
                 })
             return Disposables.create()
         }
+    }
+    
+    private func getResponseType(for json: JSON) -> Response {
+        if Response.itemsExist(with: json) {
+            return Response.ok(content: json)
+        }
+        return Response.apiRateLimit(content: "API rate limit exceeded.")
     }
 }
 
@@ -79,6 +87,16 @@ enum Sort {
         case .updated:
             return "updated"
         }
+    }
+}
+
+enum Response {
+    case ok(content: JSON)
+    case success(content: [ResultElement])
+    case apiRateLimit(content: String)
+    
+    static func itemsExist(with json: JSON) -> Bool {
+        return json[JSONKeys.items.attribut] != JSON.null
     }
 }
 

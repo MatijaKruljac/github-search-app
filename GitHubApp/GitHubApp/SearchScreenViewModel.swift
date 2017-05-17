@@ -17,7 +17,7 @@ class SearchScreenViewModel: BaseViewModel {
         self.dataFetcher = DataFetcher()
     }
     
-    func callFetchRawResultAndParseIt(for query: String, with sort: Sort? = nil) -> Observable<[ResultElement]> {
+    func callFetchRawResultAndParseIt(for query: String, with sort: Sort? = nil) -> Observable<Response> {
         return Observable.create{ [weak self] observer in
             guard
                 let disposeBag = self?.disposeBag,
@@ -27,8 +27,8 @@ class SearchScreenViewModel: BaseViewModel {
             dataFetcher
                 .fetchRawResultAndParseIt(for: query, with: sort)
                 .asObservable()
-                .subscribe(onNext: { elements in
-                    observer.on(.next(elements))
+                .subscribe(onNext: { response in
+                    observer.on(.next(response))
                     observer.on(.completed)
                 }, onError: { error in
                     observer.on(.error(error))

@@ -16,7 +16,7 @@ class DataFetcher {
     let disposeBag = DisposeBag()
     let networkHandler = NetworkHandler()
     
-    func fetchRawResultAndParseIt(for query: String, with sort: Sort? = nil) -> Observable<[ResultElement]> {
+    func fetchRawResultAndParseIt(for query: String, with sort: Sort? = nil) -> Observable<Response> {
         return Observable.create{ [weak self] observer in
             guard let disposeBag = self?.disposeBag else {
                 return Disposables.create()
@@ -25,8 +25,13 @@ class DataFetcher {
                 .fetchDataFor(query: query, with: sort)
                 .asObservable()
                 .subscribe(onNext: { value in
-                    guard let parsedData = self?.parse(json: value) else { return }
-                    observer.on(.next(parsedData))
+                    if case .ok(let content) = value {
+                        guard let parsedData = self?.parse(json: content) else { return }
+                        observer.on(.next(parsedData))
+                    }
+                    if case .apiRateLimit(_) = value {
+                        observer.on(.next(value))
+                    }
                     observer.on(.completed)
                 }, onError: { error in
                     observer.on(.error(error))
@@ -35,7 +40,7 @@ class DataFetcher {
         }
     }
     
-    private func parse(json: JSON) -> [ResultElement] {
+    private func parse(json: JSON) -> Response {
         
         var resultElements = [ResultElement]()
         
@@ -44,11 +49,9 @@ class DataFetcher {
                 let resultElement = addExistingValues(for: item)
                 resultElements.append(resultElement)
             }
-        } else {
-            let resultElement = addExistingValues(for: json)
-            resultElements.append(resultElement)
         }
-        return resultElements
+        
+        return Response.success(content: resultElements)
     }
     
     private func addExistingValues(for item: JSON) -> ResultElement {

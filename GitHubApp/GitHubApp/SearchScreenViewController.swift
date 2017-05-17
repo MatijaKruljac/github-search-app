@@ -188,7 +188,12 @@ extension SearchScreenViewController: UISearchBarDelegate {
         searchScreenViewModel.callFetchRawResultAndParseIt(for: searchQuery, with: sort)
             .asObservable()
             .subscribe(onNext: { [weak self] value in
-                self?.data.value = value
+                if case .success(let content) = value {
+                    self?.data.value = content
+                }
+                if case .apiRateLimit(let content) = value {
+                    self?.showAlert(withMessage: content)
+                }
                 self?.shouldHideFetchingDataIndicator(true)
                 }, onError: { [weak self] error in
                     if case ResponseError.networkFailure(_) = error {
