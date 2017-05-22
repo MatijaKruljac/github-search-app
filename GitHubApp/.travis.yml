@@ -1,5 +1,0 @@
-osx_image: xcode8.3
-language: swift
-
-script:
-- xcodebuild -project GitHubApp.xcodeproj -alltargets -configuration Release
